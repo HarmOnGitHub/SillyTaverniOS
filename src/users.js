@@ -1,3 +1,13 @@
+// some fuckery
+const { MessageChannel, receiveMessageOnPort } = require('worker_threads');
+const channel = new MessageChannel();
+globalThis.structuredClone = function structuredClone(value, transfer) {
+    channel.port1.postMessage(value, transfer);
+    const received = receiveMessageOnPort(channel.port2);
+    return received ? received.message : undefined;
+}
+
+
 // Native Node Modules
 const path = require('path');
 const fs = require('fs');
@@ -449,7 +459,7 @@ function getUserDirectories(handle) {
         }
     }
 
-    const directories = structuredClone(USER_DIRECTORY_TEMPLATE);
+    const directories = globalThis.structuredClone(USER_DIRECTORY_TEMPLATE);
     for (const key in directories) {
         directories[key] = path.join(global.DATA_ROOT, handle, USER_DIRECTORY_TEMPLATE[key]);
     }
